@@ -3754,17 +3754,7 @@ function Compkiller:_LoadDropdown(BaseParent: TextButton , Callback: () -> any)
 						TextTransparency = ((MatchDefault(v,DataFrame)) and 0) or 0.5
 					});
 
-					-- Convert to array of selected values
-					local selectedValues = {};
-					for key, isSelected in next, DataFrame do
-						if isSelected == true then
-							table.insert(selectedValues, key);
-						end;
-					end;
-					
-					-- Pass as string like single dropdown
-					local resultString = table.concat(selectedValues, ", ");
-					Callback(resultString)
+					Callback(DataFrame)
 				end);
 			else
 				Compkiller:_Input(bth.DropdownItem,function()
@@ -5143,7 +5133,18 @@ function Compkiller:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal)
 
 			ValueText.Text = DaTabarser(Config.Default);
 
-			Config.Callback(value);
+			-- Convert to string for user callback if multi-select
+			if Config.Multi and typeof(value) == 'table' then
+				local selectedValues = {};
+				for key, isSelected in next, value do
+					if isSelected == true then
+						table.insert(selectedValues, key);
+					end;
+				end;
+				Config.Callback(table.concat(selectedValues, ", "));
+			else
+				Config.Callback(value);
+			end;
 		end);
 
 		repi.EventOut:Connect(function(v)
