@@ -4958,25 +4958,19 @@ function Compkiller:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal)
 			local Out;
 
 			if typeof(value) == 'table' then
-				if #value > 0 then
-					local x = {};
-
-					for i,v in next , value do
+				local x = {};
+				
+				for i,v in next , value do
+					if typeof(i) == 'number' then
+						-- Array format: {1 = "Item1", 2 = "Item2"}
 						table.insert(x , tostring(v))
-					end;
-
-					Out = table.concat(x,' , ');
-				else
-					local x = {};
-
-					for i,v in next , value do
-						if v == true then
-							table.insert(x , tostring(i));
-						end			
-					end;
-
-					Out = table.concat(x,' , ');
+					elseif v == true then
+						-- Boolean format: {Item1 = true, Item2 = false}
+						table.insert(x , tostring(i));
+					end			
 				end;
+
+				Out = table.concat(x,' , ');
 			else
 				Out = tostring(value);
 			end;
