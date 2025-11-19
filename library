@@ -3124,6 +3124,11 @@ function Compkiller:_LoadOption(Value , TabSignal)
 			Blacklist = {}
 		});
 
+		-- Convert Enum.KeyCode to string if needed
+		if typeof(Config.Default) == "EnumItem" then
+			Config.Default = Config.Default.Name;
+		end;
+
 		local Keybind = Value:AddLink('Keybind' , Config.Default);
 
 		local IsBinding = false;
@@ -3918,6 +3923,11 @@ function Compkiller:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal)
 			Callback = function() end;
 			Blacklist = {}
 		});
+
+		-- Convert Enum.KeyCode to string if needed
+		if typeof(Config.Default) == "EnumItem" then
+			Config.Default = Config.Default.Name;
+		end;
 
 		local Block = Compkiller:_CreateBlock(Signal);
 
