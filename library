@@ -3756,8 +3756,8 @@ function Compkiller:_LoadDropdown(BaseParent: TextButton , Callback: () -> any)
 
 					-- Convert boolean table to array of selected values
 					local selectedValues = {};
-					for key, isSelected in pairs(DataFrame) do
-						if isSelected then
+					for key, isSelected in next, DataFrame do
+						if isSelected == true then
 							table.insert(selectedValues, key);
 						end;
 					end;
