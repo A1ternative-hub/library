@@ -5127,17 +5127,6 @@ function Compkiller:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal)
 				BackgroundColor3 = Compkiller.Colors.MouseEnter
 			});
 		end,function()
-			Compkiller:_Animation(ValueItems,TweenInfo.new(0.3),{
-				BackgroundColor3 = Compkiller.Colors.DropColor
-			});
-		end);
-
-		Args.Flag = Config.Flag;
-
-		function Args:SetValue(Value)
-			Config.Default = Value;
-
-			ValueText.Text = DaTabarser(Config.Default);
 
 			repi:SetData(Config.Default,Config.Values,Config.Multi,true);
 
