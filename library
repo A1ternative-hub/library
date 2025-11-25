@@ -5132,48 +5132,6 @@ function Compkiller:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal)
 			});
 		end);
 
-		local repi;
-		local Button = Compkiller:_Input(ValueItems);
-
-		repi = Compkiller:_LoadDropdown(Button,function(value)
-			Config.Default = value;
-
-			repi:SetData(Config.Default,Config.Values,Config.Multi,false);
-			repi:SetDefault(Config.Default);
-
-			ValueText.Text = DaTabarser(Config.Default);
-
-			-- Convert to string for user callback if multi-select
-			if Config.Multi and typeof(value) == 'table' then
-				local selectedValues = {};
-				for key, isSelected in next, value do
-					if isSelected == true then
-						table.insert(selectedValues, key);
-					end;
-				end;
-				Config.Callback(table.concat(selectedValues, ", "));
-			else
-				Config.Callback(value);
-			end;
-		end);
-
-		repi.EventOut:Connect(function(v)
-			if v then
-				Compkiller:_Animation(MainButton,TweenInfo.new(0.2),{
-					Rotation = -180
-				})
-			else
-				Compkiller:_Animation(MainButton,TweenInfo.new(0.2),{
-					Rotation = 0
-				})
-			end;
-		end)
-
-		repi:SetData(Config.Default,Config.Values,Config.Multi,false);
-		repi:Refersh();
-
-		local Args = {};
-
 		Args.Flag = Config.Flag;
 
 		function Args:SetValue(Value)
