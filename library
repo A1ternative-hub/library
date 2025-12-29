@@ -5143,7 +5143,7 @@ repi: SetDefault(Config.Default);
 
 ValueText.Text = DaTabarser(Config.Default);
 
---Convert to string for user callback if multi - select
+--Convert to table with __tostring for multi - select
 			if Config.Multi and typeof (value) == 'table' then
 				local selectedValues = {};
 for key, isSelected in next, value do
@@ -5151,7 +5151,12 @@ for key, isSelected in next, value do
 						table.insert(selectedValues, key);
 end;
 end;
-Config.Callback(table.concat(selectedValues, ', '));
+setmetatable(selectedValues, {
+	__tostring = function (t)
+						return table.concat(t, ', ');
+	end
+});
+Config.Callback(selectedValues);
 			else
 Config.Callback(value);
 end;
@@ -5258,15 +5263,20 @@ Args.Link = Compkiller: _LoadOption({
 });
 
 function Args: GetValue()
---Convert to string for multi - select to match single dropdown behavior
-if Config.Multi and typeof (Config.Default) == 'table' then
+--Convert to table with __tostring for multi - select
+			if Config.Multi and typeof (Config.Default) == 'table' then
 				local selectedValues = {};
 for key, isSelected in next, Config.Default do
 	if isSelected == true then
 						table.insert(selectedValues, key);
 end;
 end;
-return table.concat(selectedValues, ', ');
+setmetatable(selectedValues, {
+	__tostring = function (t)
+						return table.concat(t, ', ');
+	end
+});
+return selectedValues;
 			else
 return Config.Default;
 end;
