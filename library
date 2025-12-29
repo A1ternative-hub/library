@@ -7531,153 +7531,6 @@ function Compkiller.new(Config : Window)
 			Icon_2.ZIndex = 15
 			Icon_2.Image = Compkiller:CacheImage("rbxassetid://10723344270")
 			Icon_2.ImageTransparency = 1
-
-			local AutoGlobal = Instance.new("Frame")
-			local AutoGlobalIcon = Instance.new("ImageLabel")
-			local AutoGlobalStroke = Instance.new("UIStroke")
-			local AutoGlobalCorner = Instance.new("UICorner")
-
-			AutoGlobal.Name = Compkiller:_RandomString()
-			AutoGlobal.Parent = LinkValues
-			AutoGlobal.BackgroundTransparency = 1.000
-			AutoGlobal.BackgroundColor3 = Compkiller.Colors.Highlight
-			AutoGlobal.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			AutoGlobal.BorderSizePixel = 0
-			AutoGlobal.Size = UDim2.new(0, 30, 0, 30)
-			AutoGlobal.ZIndex = 14
-
-			table.insert(Compkiller.Elements.Highlight,{
-				Element = AutoGlobal,
-				Property = "BackgroundColor3"
-			});
-
-			AutoGlobalIcon.Name = Compkiller:_RandomString()
-			AutoGlobalIcon.Parent = AutoGlobal
-			AutoGlobalIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-			AutoGlobalIcon.BackgroundTransparency = 1.000
-			AutoGlobalIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			AutoGlobalIcon.BorderSizePixel = 0
-			AutoGlobalIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
-			AutoGlobalIcon.Size = UDim2.new(0.6, 0, 0.6, 0)
-			AutoGlobalIcon.ZIndex = 15
-			AutoGlobalIcon.Image = Compkiller.Lucide['lucide-earth']
-			AutoGlobalIcon.ImageColor3 = Compkiller.Colors.SwitchColor
-			AutoGlobalIcon.ImageTransparency = 1
-
-			table.insert(Compkiller.Elements.SwitchColor , {
-				Element = AutoGlobalIcon,
-				Property = 'ImageColor3'
-			});
-
-			AutoGlobalStroke.Transparency = 1
-			AutoGlobalStroke.Color = Compkiller.Colors.StrokeColor
-			AutoGlobalStroke.Parent = AutoGlobal
-
-			table.insert(Compkiller.Elements.StrokeColor,{
-				Element = AutoGlobalStroke,
-				Property = "Color"
-			});
-
-			AutoGlobalCorner.CornerRadius = UDim.new(0, 3)
-			AutoGlobalCorner.Parent = AutoGlobal
-
-			local AutoGame = Instance.new("Frame")
-			local AutoGameIcon = Instance.new("ImageLabel")
-			local AutoGameStroke = Instance.new("UIStroke")
-			local AutoGameCorner = Instance.new("UICorner")
-
-			AutoGame.Name = Compkiller:_RandomString()
-			AutoGame.Parent = LinkValues
-			AutoGame.BackgroundTransparency = 1.000
-			AutoGame.BackgroundColor3 = Compkiller.Colors.Highlight
-			AutoGame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			AutoGame.BorderSizePixel = 0
-			AutoGame.Size = UDim2.new(0, 30, 0, 30)
-			AutoGame.ZIndex = 14
-
-			table.insert(Compkiller.Elements.Highlight,{
-				Element = AutoGame,
-				Property = "BackgroundColor3"
-			});
-
-			AutoGameIcon.Name = Compkiller:_RandomString()
-			AutoGameIcon.Parent = AutoGame
-			AutoGameIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-			AutoGameIcon.BackgroundTransparency = 1.000
-			AutoGameIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			AutoGameIcon.BorderSizePixel = 0
-			AutoGameIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
-			AutoGameIcon.Size = UDim2.new(0.6, 0, 0.6, 0)
-			AutoGameIcon.ZIndex = 15
-			AutoGameIcon.Image = Compkiller.Lucide['lucide-gamepad-2']
-			AutoGameIcon.ImageColor3 = Compkiller.Colors.SwitchColor
-			AutoGameIcon.ImageTransparency = 1
-
-			table.insert(Compkiller.Elements.SwitchColor , {
-				Element = AutoGameIcon,
-				Property = 'ImageColor3'
-			});
-
-			AutoGameStroke.Transparency = 1
-			AutoGameStroke.Color = Compkiller.Colors.StrokeColor
-			AutoGameStroke.Parent = AutoGame
-
-			table.insert(Compkiller.Elements.StrokeColor,{
-				Element = AutoGameStroke,
-				Property = "Color"
-			});
-
-			AutoGameCorner.CornerRadius = UDim.new(0, 3)
-			AutoGameCorner.Parent = AutoGame
-
-			local AutoPlace = Instance.new("Frame")
-			local AutoPlaceIcon = Instance.new("ImageLabel")
-			local AutoPlaceStroke = Instance.new("UIStroke")
-			local AutoPlaceCorner = Instance.new("UICorner")
-
-			AutoPlace.Name = Compkiller:_RandomString()
-			AutoPlace.Parent = LinkValues
-			AutoPlace.BackgroundTransparency = 1.000
-			AutoPlace.BackgroundColor3 = Compkiller.Colors.Highlight
-			AutoPlace.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			AutoPlace.BorderSizePixel = 0
-			AutoPlace.Size = UDim2.new(0, 30, 0, 30)
-			AutoPlace.ZIndex = 14
-
-			table.insert(Compkiller.Elements.Highlight,{
-				Element = AutoPlace,
-				Property = "BackgroundColor3"
-			});
-
-			AutoPlaceIcon.Name = Compkiller:_RandomString()
-			AutoPlaceIcon.Parent = AutoPlace
-			AutoPlaceIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-			AutoPlaceIcon.BackgroundTransparency = 1.000
-			AutoPlaceIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			AutoPlaceIcon.BorderSizePixel = 0
-			AutoPlaceIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
-			AutoPlaceIcon.Size = UDim2.new(0.6, 0, 0.6, 0)
-			AutoPlaceIcon.ZIndex = 15
-			AutoPlaceIcon.Image = Compkiller.Lucide['lucide-anchor']
-			AutoPlaceIcon.ImageColor3 = Compkiller.Colors.SwitchColor
-			AutoPlaceIcon.ImageTransparency = 1
-
-			table.insert(Compkiller.Elements.SwitchColor , {
-				Element = AutoPlaceIcon,
-				Property = 'ImageColor3'
-			});
-
-			AutoPlaceStroke.Transparency = 1
-			AutoPlaceStroke.Color = Compkiller.Colors.StrokeColor
-			AutoPlaceStroke.Parent = AutoPlace
-
-			table.insert(Compkiller.Elements.StrokeColor,{
-				Element = AutoPlaceStroke,
-				Property = "Color"
-			});
-
-			AutoPlaceCorner.CornerRadius = UDim.new(0, 3)
-			AutoPlaceCorner.Parent = AutoPlace
 			UIStroke_3.Transparency = 1
 
 			UIStroke_3.Color = Compkiller.Colors.StrokeColor
@@ -7768,6 +7621,91 @@ function Compkiller.new(Config : Window)
 						Transparency = 0
 					});
 
+					Compkiller:_Animation(TextLabel,Tween,{
+						TextStrokeTransparency = 0.900,
+						TextTransparency = 0
+					});
+
+					Compkiller:_Animation(TextLabel_2,Tween,{
+						TextStrokeTransparency = 0.900,
+						TextTransparency = 0
+					});
+				else
+					Compkiller:_Animation(AuthorText,Tween,{
+						TextTransparency = 1,
+						Position = UDim2.new(0.5, -65, 0.5, 15)
+					});
+
+					Compkiller:_Animation(Icon_2,Tween,{
+						ImageTransparency = 1
+					});
+
+					Compkiller:_Animation(Icon,Tween,{
+						ImageTransparency = 1
+					});
+
+					Compkiller:_Animation(LinkValues,Tween,{
+						Position = UDim2.new(1, -12, 0.5, 15)
+					});
+
+					Compkiller:_Animation(ConfigBlock,Tween,{
+						BackgroundTransparency = 1
+					});
+
+					Compkiller:_Animation(ConfigText,Tween,{
+						TextTransparency = 1,
+						Position = UDim2.new(0, 12, 0.5, 15)
+					});
+
+					Compkiller:_Animation(Frame,Tween,{
+						BackgroundTransparency = 1
+					});
+
+					Compkiller:_Animation(UIStroke,Tween,{
+						Transparency = 1
+					});
+
+					Compkiller:_Animation(Frame_2,Tween,{
+						BackgroundTransparency = 1
+					});
+
+					Compkiller:_Animation(UIStroke_2,Tween,{
+						Transparency = 1
+					});
+
+					Compkiller:_Animation(TextLabel,Tween,{
+						TextStrokeTransparency = 1,
+						TextTransparency = 1
+					});
+
+					Compkiller:_Animation(TextLabel_2,Tween,{
+						TextStrokeTransparency = 1,
+						TextTransparency = 1
+					});
+				end;
+			end;
+
+			function ConfigButton:Update()
+				local nameScale = TextService:GetTextSize(ConfigText.Text,ConfigText.TextSize,ConfigText.Font,Vector2.new(math.huge,math.huge));
+
+				AuthorText:SetAttribute('SPC',math.clamp(nameScale.X + 20 , 100,150));
+
+				AuthorText.Position = UDim2.new(0, AuthorText:GetAttribute('SPC'), 0.5, 15)
+			end;
+
+			ConfigButton:Update();
+
+			Compkiller:_Input(LoadButton,function()
+				task.spawn(ConfigButton.OnLoad);
+			end);
+
+			Compkiller:_Input(SaveButton,function()
+				task.spawn(ConfigButton.OnSave);
+			end);
+
+			DelButton.MouseButton1Click:Connect(function()
+				task.spawn(ConfigButton.OnDelete);
+			end)
 
 			ConfigButton.OnLoad = nil;
 			ConfigButton.OnSave = nil;
@@ -9376,30 +9314,11 @@ function Compkiller:ConfigManager(ConfigManager: ConfigManager) : ConfigFunction
 		end;
 	end;
 
-	function Args:SetAutoload(ConfigName: string, Mode: string)
-		local AutoloadPath = Compkiller:_Path(Args.Directory, "Autoloads.json");
-		local Autoloads = {};
+	return Args;
+end;
 
-		if isfile(AutoloadPath) then
-			Autoloads = HttpService:JSONDecode(readfile(AutoloadPath));
-		end;
-
-		if Mode == "Global" then
-			Autoloads.Global = ConfigName;
-		elseif Mode == "GameId" then
-			Autoloads.GameId = Autoloads.GameId or {};
-			Autoloads.GameId[tostring(game.GameId)] = ConfigName;
-		elseif Mode == "PlaceId" then
-			Autoloads.PlaceId = Autoloads.PlaceId or {};
-			Autoloads.PlaceId[tostring(game.PlaceId)] = ConfigName;
-		end;
-
-		writefile(AutoloadPath, HttpService:JSONEncode(Autoloads));
-		
-		if Args.EnableNotify then
-			notify.new({
-				Title = "Configs",
-				Icon = Compkiller:_GetIcon('settings'),
+function Compkiller:Loader(IconId,Duration)
+	local CompKiller = Instance.new("ScreenGui")
 
 	CompKiller.Name = Compkiller:_RandomString()
 	CompKiller.Parent = CoreGui
