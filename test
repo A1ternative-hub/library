@@ -4072,19 +4072,6 @@ Args.Signal = Signal: Connect(function (bool)
 			Block: SetVisible(bool);
 		end);
 
-Args.Link = Compkiller: _LoadOption(Block);
-
-function Args: GetValue()
-return {
-    ColorPicker = {
-        Color = Config.Default,
-        Transparency = Config.Transparency
-		local BlockLine = Instance.new("Frame")
-		local DescriptionText = Instance.new("TextLabel")
-
-if Compkiller: _IsMobile() then
-Compkiller: _AddDragBlacklist(Paragraph);
-end;
 
 Paragraph.Name = Compkiller: _RandomString()
 Paragraph.Parent = Parent
