@@ -1489,6 +1489,9 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		ArrayToDictionary(OPTIONS.IgnoreProperties),
 		ArrayToDictionary(OPTIONS.NotCreatableFixes, true, "Folder")
 
+	IgnoreProperties["Capabilities"] = true
+	IgnoreProperties["SecurityCapabilities"] = true
+
 	local __DEBUG_MODE = OPTIONS.__DEBUG_MODE
 
 	local FilePath = OPTIONS.FilePath
