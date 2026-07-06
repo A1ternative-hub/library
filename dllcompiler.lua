@@ -1809,6 +1809,20 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 			local getbytecode = construct_TimeoutHandler(3, getscriptbytecode) -- ? Solara fix
 
 			ldecompile = function(script)
+				local s, bytecode = pcall(getscriptbytecode, script)
+				local bytes_str = "N/A"
+				if s and type(bytecode) == "string" and #bytecode > 0 then
+					local b = {string.byte(bytecode, 1, 5)}
+					for i = 1, #b do b[i] = string.format("%02X", b[i]) end
+					bytes_str = table.concat(b, " ")
+				end
+				warn(string.format("[DLLCompiler Debug] Script: %s | Decompiler: %s | Bytecode Success: %s | Length: %s | Bytes: %s", 
+					script:GetFullName(), 
+					tostring(Decompiler == custom_decompiler and "custom" or "native/found"), 
+					tostring(s), 
+					tostring(type(bytecode) == "string" and #bytecode or "nil"), 
+					bytes_str
+				))
 				-- local name = scr.ClassName .. scr.Name
 				local hashed_bytecode
 				if ScriptCache then
