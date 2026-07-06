@@ -170,11 +170,7 @@ if getscriptbytecode then
 			return "-- Failed to get script bytecode: " .. tostring(bytecode)
 		end
 
-		local elapsed = os.clock() - last_konstant_call
-		if elapsed < 0.5 then
-			task.wait(0.5 - elapsed)
-		end
-		last_konstant_call = os.clock()
+
 
 		local httpResult = request_func({
 			Url = "http://api.plusgiant5.com/konstant/decompile",
@@ -1565,7 +1561,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		local completed = 0
 		local queue = {unpack(scripts)}
 		local active = 0
-		local max_threads = 8
+		local max_threads = 16
 
 		local function worker()
 			active += 1
@@ -1581,7 +1577,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 						StatusText.Text = "Pre-decompiling scripts: " .. completed .. "/" .. total
 					end
 				end
-				task.wait(0.05)
+				task.wait()
 			end
 			active -= 1
 		end
