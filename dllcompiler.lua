@@ -811,6 +811,7 @@ The value of each component is represented by the text content formatted as a 32
 	end,
 	int64 = nil,
 	string = function(raw, skipEmptyCheck)
+		if type(raw) ~= "string" then raw = tostring(raw) end
 		return not skipEmptyCheck and raw == "" and raw
 			or string_find(raw, "]]>") and string.gsub(raw, ESCAPES_PATTERN, ESCAPES)
 			or XML_Descriptors.__CDATA(string.gsub(raw, "\0", ""))
@@ -822,7 +823,7 @@ for descriptorName, redirectName in
 		Vector2int16 = "Vector2",
 		Vector3int16 = "Vector3",
 		int64 = "int", -- Int64 (long)
-		SecurityCapabilities = "int64",
+		SecurityCapabilities = "int",
 		ContentId = "Content",
 		Soundscape = "string",
 		UniqueId = "string",
