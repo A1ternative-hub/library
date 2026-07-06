@@ -1544,6 +1544,12 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 	if not ldeccache then
 		ldeccache = {}
 		GLOBAL_ENV.scriptcache = ldeccache
+	else
+		for k, v in ldeccache do
+			if v == true or v == "true" or type(v) ~= "string" or string.find(tostring(v), "PASSED BYTECODE IS TOO OLD") or string.find(tostring(v), "Failed to decompile") or string.find(tostring(v), "Decompiler timed out") then
+				ldeccache[k] = nil
+			end
+		end
 	end
 
 	local DecompileIgnoring, ToSaveList, ldecompile, placename, elapse_t, SaveNonCreatableWillBeEnabled, RecoveredScripts, construct_TimeoutHandler
