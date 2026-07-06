@@ -97,7 +97,29 @@ local gethiddenproperty = global_container.gethiddenproperty
 local readfile = global_container.readfile
 local writefile = global_container.writefile
 
-local getscriptbytecode = global_container.getscriptbytecode -- * A lot of assumptions are made based on whether this function is defined or not. So in certain edge cases, like if the executor defines "decompile" or "getscripthash" function yet doesn't define this function there might be loss of functionality of the saveinstance. Although that would be very rare and weird
+local getscriptbytecode = global_container.getscriptbytecode
+if getscriptbytecode then
+	local old_getscriptbytecode = getscriptbytecode
+	getscriptbytecode = function(script)
+		local success, bytecode = pcall(old_getscriptbytecode, script)
+		if not success then
+			error(bytecode, 0)
+		end
+		if type(bytecode) == "string" and #bytecode > 0 then
+			local version = string.byte(bytecode, 1)
+			if version > 6 then
+				bytecode = string.char(6) .. string.sub(bytecode, 2)
+			end
+		end
+		return bytecode
+	end
+	global_container.getscriptbytecode = getscriptbytecode
+	if getgenv then
+		pcall(function()
+			getgenv().getscriptbytecode = getscriptbytecode
+		end)
+	end
+end
 local base64encode = global_container.base64encode
 local sha384
 
