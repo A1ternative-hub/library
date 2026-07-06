@@ -92,6 +92,8 @@ local identify_executor = identifyexecutor or getexecutorname or whatexecutor
 
 local EXECUTOR_NAME = identify_executor()
 
+local native_decompile = decompile or (getgenv and getgenv().decompile)
+
 local gethiddenproperty = global_container.gethiddenproperty
 -- local appendfile = global_container.appendfile
 local readfile = global_container.readfile
@@ -1807,7 +1809,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 			load_decompiler(Timeout)
 		end
 		local Decompiler = OPTIONS.decomptype == "custom" and custom_decompiler
-			or decompile
+			or native_decompile
 			or global_container.decompile
 			or custom_decompiler
 
