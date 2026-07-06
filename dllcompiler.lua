@@ -1569,8 +1569,6 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		local active = 0
 		local max_threads = 40
 
-		local decompile_with_timeout = construct_TimeoutHandler(OPTIONS.timeout or 10, custom_decompiler, "Decompiler timed out")
-
 		local function worker()
 			active += 1
 			while true do
@@ -1585,7 +1583,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 					end
 				end
 
-				local success, result = pcall(decompile_with_timeout, scr)
+				local success, result = pcall(custom_decompiler, scr)
 				local output = success and result or ("-- Failed to decompile: " .. tostring(result))
 				
 				ldeccache[scr] = output
