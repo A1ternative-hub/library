@@ -527,6 +527,7 @@ XML_Descriptors = {
 		return "<min>" .. descriptor(min) .. "</min><max>" .. descriptor(max) .. "</max>"
 	end,
 	__PROTECTEDSTRING = function(raw) -- ? its purpose is to "protect" data from being treated as ordinary character data during processing;
+		raw = tostring(raw)
 		return string_find(raw, "]]>") and string.gsub(raw, ESCAPES_PATTERN, ESCAPES) or XML_Descriptors.__CDATA(raw)
 	end,
 	__SEQUENCE = function(raw, valueFormatter) --The value is the text content, formatted as a space-separated list of floating point numbers.
