@@ -100,28 +100,6 @@ local readfile = global_container.readfile
 local writefile = global_container.writefile
 
 local getscriptbytecode = global_container.getscriptbytecode
-if getscriptbytecode then
-	local old_getscriptbytecode = getscriptbytecode
-	getscriptbytecode = function(script)
-		local success, bytecode = pcall(old_getscriptbytecode, script)
-		if not success then
-			error(bytecode, 0)
-		end
-		if type(bytecode) == "string" and #bytecode > 0 then
-			local version = string.byte(bytecode, 1)
-			if version > 6 then
-				bytecode = string.char(6) .. string.sub(bytecode, 2)
-			end
-		end
-		return bytecode
-	end
-	global_container.getscriptbytecode = getscriptbytecode
-	if getgenv then
-		pcall(function()
-			getgenv().getscriptbytecode = getscriptbytecode
-		end)
-	end
-end
 local base64encode = global_container.base64encode
 local sha384
 
@@ -187,56 +165,44 @@ do
 	end
 end
 
-local custom_decompiler, load_decompiler -- TODO Temporary
+local custom_decompiler, load_decompiler
 
 if getscriptbytecode then
-	-- Credits @roluau
-	local decompiler_source
+	local request_func = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+	local last_konstant_call = 0
 
-	if
-		pcall(function()
-			decompiler_source =
-				game:HttpGet("https://raw.githubusercontent.com/w-a-e/Advanced-Decompiler-V3/main/init.lua", true)
-		end)
-	then
-		load_decompiler = function(decompTimeout)
-			local CONSTANTS = [[
-	local ENABLED_REMARKS = {
-		NATIVE_REMARK = true,
-		INLINE_REMARK = true
-	}
-	local DECOMPILER_TIMEOUT = ]] .. decompTimeout .. [[
-		
-	local READER_FLOAT_PRECISION = 7 -- up to 99
-	local SHOW_INSTRUCTION_LINES = false
-	local SHOW_REFERENCES = true
-	local SHOW_OPERATION_NAMES = false
-	local SHOW_MISC_OPERATIONS = false
-	local LIST_USED_GLOBALS = true
-	local RETURN_ELAPSED_TIME = false
-	]]
-			local _ENV = (getgenv or getrenv or getfenv)()
-			local old = _ENV.decompile
+	custom_decompiler = function(script)
+		if not getscriptbytecode then
+			return "-- Decompilation failed: getscriptbytecode is not supported by your executor"
+		end
+		if not request_func then
+			return "-- Decompilation failed: Http requests are not supported by your executor (request is nil)"
+		end
 
-			local f = loadstring(
-				string.gsub(
-					string.gsub(
-						decompiler_source,
-						"return %(x %% 2^32%) // %(2^disp%)",
-						"return math.floor((x %% 2^32) / (2^disp))",
-						1
-					), -- TODO Temporary fix for macsploit (// operator)
-					";;CONSTANTS HERE;;",
-					CONSTANTS
-				),
-				"Advanced-Decompiler-V3"
-			)
-			if not f then
-				return
-			end
-			f()
-			custom_decompiler = _ENV.decompile
-			_ENV.decompile = old
+		local success, bytecode = pcall(getscriptbytecode, script)
+		if not success or type(bytecode) ~= "string" or bytecode == "" then
+			return "-- Failed to get script bytecode: " .. tostring(bytecode)
+		end
+
+		local elapsed = os.clock() - last_konstant_call
+		if elapsed < 0.5 then
+			task.wait(0.5 - elapsed)
+		end
+		last_konstant_call = os.clock()
+
+		local httpResult = request_func({
+			Url = "http://api.plusgiant5.com/konstant/decompile",
+			Body = bytecode,
+			Method = "POST",
+			Headers = {
+				["Content-Type"] = "text/plain"
+			}
+		})
+
+		if httpResult.StatusCode ~= 200 then
+			return "-- Error occurred while requesting Konstant API, error:\n--[[\n" .. tostring(httpResult.Body) .. "\n]]"
+		else
+			return httpResult.Body
 		end
 	end
 end
