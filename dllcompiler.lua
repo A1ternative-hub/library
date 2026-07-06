@@ -1785,6 +1785,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 			load_decompiler(Timeout)
 		end
 		local Decompiler = OPTIONS.decomptype == "custom" and custom_decompiler
+			or decompile
 			or global_container.decompile
 			or custom_decompiler
 
