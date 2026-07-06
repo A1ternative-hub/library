@@ -1583,7 +1583,12 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 					end
 				end
 
-				local success, result = pcall(custom_decompiler, scr)
+				local success, result
+				if custom_decompiler then
+					success, result = pcall(custom_decompiler, scr)
+				else
+					success, result = false, "getscriptbytecode is not supported by your executor"
+				end
 				local output = success and result or ("-- Failed to decompile: " .. tostring(result))
 				
 				ldeccache[scr] = output
