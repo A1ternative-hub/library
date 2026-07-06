@@ -1949,7 +1949,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 	end
 
 	local function ReturnProperty(tag, propertyName, value)
-		return "<" .. tag .. ' name="' .. propertyName .. '">' .. value .. "</" .. tag .. ">"
+		return "<" .. tag .. ' name="' .. propertyName .. '">' .. tostring(value) .. "</" .. tag .. ">"
 	end
 
 	local function ReturnValueAndTag(raw, valueType, descriptor)
