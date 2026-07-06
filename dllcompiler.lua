@@ -2392,7 +2392,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 											end
 										end
 
-										value = "-- Saved by DLLDecompile - Roluau's project"
+										value = value or "-- Saved by DLLDecompile - Roluau's project"
 									end
 								end
 								value = XML_Descriptors.__PROTECTEDSTRING(value)
