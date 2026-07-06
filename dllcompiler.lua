@@ -155,6 +155,7 @@ local custom_decompiler, load_decompiler
 local decompiler_bytecode_cache = {}
 
 do
+	local local_decompiler
 	local success, source = pcall(function()
 		return game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/Advanced-Decompiler-V3/refs/heads/main/init.lua", true)
 	end)
@@ -163,43 +164,53 @@ do
 		if f then
 			local ok, result = pcall(f)
 			if ok and type(result) == "function" then
-				custom_decompiler = result
+				local_decompiler = result
 			end
 		end
 	end
 
-	if not custom_decompiler and getscriptbytecode then
+	local function konstant_decompiler(script)
+		local success, bytecode = pcall(getscriptbytecode, script)
+		if not success or type(bytecode) ~= "string" or bytecode == "" then
+			return "-- Failed to get script bytecode: " .. tostring(bytecode)
+		end
+
+		if decompiler_bytecode_cache[bytecode] then
+			return decompiler_bytecode_cache[bytecode]
+		end
+
 		local request_func = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
-		if request_func then
-			custom_decompiler = function(script)
-				local success, bytecode = pcall(getscriptbytecode, script)
-				if not success or type(bytecode) ~= "string" or bytecode == "" then
-					return "-- Failed to get script bytecode: " .. tostring(bytecode)
-				end
+		if not request_func then
+			return "-- Decompilation failed: Http requests are not supported by your executor"
+		end
 
-				if decompiler_bytecode_cache[bytecode] then
-					return decompiler_bytecode_cache[bytecode]
-				end
+		local httpResult = request_func({
+			Url = "http://api.plusgiant5.com/konstant/decompile",
+			Body = bytecode,
+			Method = "POST",
+			Headers = {
+				["Content-Type"] = "text/plain"
+			},
+			Timeout = 5
+		})
 
-				local httpResult = request_func({
-					Url = "http://api.plusgiant5.com/konstant/decompile",
-					Body = bytecode,
-					Method = "POST",
-					Headers = {
-						["Content-Type"] = "text/plain"
-					},
-					Timeout = 5
-				})
+		if httpResult.StatusCode ~= 200 then
+			return "-- Error occurred while requesting Konstant API, error:\n--[[\n" .. tostring(httpResult.Body) .. "\n]]"
+		else
+			local result = httpResult.Body
+			decompiler_bytecode_cache[bytecode] = result
+			return result
+		end
+	end
 
-				if httpResult.StatusCode ~= 200 then
-					return "-- Error occurred while requesting Konstant API, error:\n--[[\n" .. tostring(httpResult.Body) .. "\n]]"
-				else
-					local result = httpResult.Body
-					decompiler_bytecode_cache[bytecode] = result
-					return result
-				end
+	custom_decompiler = function(script)
+		if local_decompiler then
+			local success, result = pcall(local_decompiler, script)
+			if success and type(result) == "string" and not string.find(result, "PASSED BYTECODE IS TOO OLD") then
+				return result
 			end
 		end
+		return konstant_decompiler(script)
 	end
 end
 
@@ -1033,7 +1044,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		mode = "optimized",
 		noscripts = false,
 		scriptcache = true,
-		decomptype = "custom",
+		decomptype = native_decompile and "native" or "custom",
 		timeout = 10,
 		--* New:
 		__DEBUG_MODE = false,
