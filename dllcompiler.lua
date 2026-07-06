@@ -1597,7 +1597,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 
 				local success, result
 				if custom_decompiler then
-					success, result = pcall(decompile_with_timeout, scr)
+					success, result = decompile_with_timeout(scr)
 				else
 					success, result = false, "getscriptbytecode is not supported by your executor"
 				end
@@ -1820,7 +1820,9 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 
 			timeoutThread = task.delay(timeout, function()
 				isCancelled = true -- TODO task.cancel
-				coroutine.resume(thread, nil, timeout_ret)
+				if coroutine.status(thread) == "suspended" then
+					coroutine.resume(thread, nil, timeout_ret)
+				end
 			end)
 
 			task.spawn(function()
@@ -1836,7 +1838,9 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 					task.wait()
 				end
 
-				coroutine.resume(thread, ok, result)
+				if coroutine.status(thread) == "suspended" then
+					coroutine.resume(thread, ok, result)
+				end
 			end)
 
 			return coroutine.yield()
