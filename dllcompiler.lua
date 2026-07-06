@@ -60,33 +60,19 @@ for rangeStart, rangeEnd in string.gmatch(ESCAPES_PATTERN, "(.)%-(.)") do
 	end
 end
 
-local global_container
-do
-	local filename = "UniversalMethodFinder"
-
-	local finder
-	finder, global_container = loadstring(
-		game:HttpGet("https://raw.githubusercontent.com/luau/SomeHub/main/" .. filename .. ".luau", true),
-		filename
-	)()
-
-	finder({
-		-- readbinarystring = 'string.find(...,"bin",nil,true)', -- ! Could match some unwanted stuff (getbinaryindex)
-		-- request = 'string.find(...,"request",nil,true) and not string.find(...,"internal",nil,true)',
-		base64encode = 'local a={...}local b=a[1]local function c(a,b)return string.find(a,b,nil,true)end;return c(b,"encode")and(c(b,"base64")or c(string.lower(tostring(a[2])),"base64"))',
-		decompile = '(string.find(...,"decomp",nil,true) and string.sub(...,#...) ~= "s") or string.find(...,"assembl",nil,true)',
-		gethiddenproperty = 'string.find(...,"get",nil,true) and string.find(...,"h",nil,true) and string.find(...,"prop",nil,true) and string.sub(...,#...) ~= "s"',
-		gethui = 'string.find(...,"get",nil,true) and string.find(...,"h",nil,true) and string.find(...,"ui",nil,true)',
-		getnilinstances = 'string.find(...,"nil",nil,true) and string.find(...,"get",nil,true) and string.sub(...,#...) == "s"', -- ! Could match some unwanted stuff
-		getscriptbytecode = 'string.find(...,"get",nil,true) and string.find(...,"bytecode",nil,true)', --  or string.find(...,"dump",nil,true) and string.find(...,"string",nil,true) due to Fluxus (dumpstring returns a function)
-		hash = 'local a={...}local b=a[1]local function c(a,b)return string.find(a,b,nil,true)end;return c(b,"hash")and c(string.lower(tostring(a[2])),"crypt")',
-		protectgui = 'string.find(...,"protect",nil,true) and string.find(...,"ui",nil,true) and not string.find(...,"un",nil,true)',
-		-- appendfile = 'string.find(...,"file",nil,true) and string.find(...,"append",nil,true)',
-		readfile = 'string.find(...,"file",nil,true) and string.find(...,"read",nil,true)',
-		writefile = 'string.find(...,"file",nil,true) and string.find(...,"write",nil,true)',
-		setthreadidentity = 'string.find(...,"identity",nil,true) and string.find(...,"set",nil,true)',
-	}, true, 10)
-end
+local global_container = {
+	base64encode = base64encode or (getgenv and getgenv().base64encode),
+	decompile = decompile or (getgenv and getgenv().decompile),
+	gethiddenproperty = gethiddenproperty or (getgenv and getgenv().gethiddenproperty) or gethiddenprop,
+	gethui = gethui or (getgenv and getgenv().gethui),
+	getnilinstances = getnilinstances or (getgenv and getgenv().getnilinstances) or get_nil_instances,
+	getscriptbytecode = getscriptbytecode or (getgenv and getgenv().getscriptbytecode),
+	hash = crypt and (crypt.hash or crypt.sha384) or hash,
+	protectgui = protectgui or (getgenv and getgenv().protectgui) or protect_gui or (syn and syn.protect_gui),
+	readfile = readfile or (getgenv and getgenv().readfile),
+	writefile = writefile or (getgenv and getgenv().writefile),
+	setthreadidentity = setthreadidentity or (getgenv and getgenv().setthreadidentity) or set_thread_identity or setthreadcontext or setidentity,
+}
 
 local identify_executor = identifyexecutor or getexecutorname or whatexecutor
 
