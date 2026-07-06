@@ -1065,7 +1065,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		},
 		SaveBytecode = false,
 
-		IgnoreProperties = { "ScriptGuid", "UniqueId", "HistoryId" },
+		IgnoreProperties = { "ScriptGuid", "UniqueId", "HistoryId", "Capabilities", "SecurityCapabilities" },
 
 		IgnoreList = { service.CoreGui, service.CorePackages },
 
