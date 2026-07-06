@@ -1596,8 +1596,6 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		local active = 0
 		local max_threads = 40
 
-		local decompile_with_timeout = construct_TimeoutHandler(OPTIONS.timeout or 10, custom_decompiler, "Decompiler timed out")
-
 		local function worker()
 			active += 1
 			while true do
@@ -1612,12 +1610,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 					end
 				end
 
-				local success, result
-				if custom_decompiler then
-					success, result = decompile_with_timeout(scr)
-				else
-					success, result = false, "getscriptbytecode is not supported by your executor"
-				end
+				local success, result = pcall(ldecompile, scr)
 				local output = success and result or ("-- Failed to decompile: " .. tostring(result))
 				
 				ldeccache[scr] = output
