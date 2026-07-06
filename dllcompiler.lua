@@ -1533,13 +1533,12 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 	end
 
 	local ldeccache = GLOBAL_ENV.scriptcache
-
-	local DecompileIgnoring, ToSaveList, ldecompile, placename, elapse_t, SaveNonCreatableWillBeEnabled, RecoveredScripts
-
-	if ScriptCache and not ldeccache then
+	if not ldeccache then
 		ldeccache = {}
 		GLOBAL_ENV.scriptcache = ldeccache
 	end
+
+	local DecompileIgnoring, ToSaveList, ldecompile, placename, elapse_t, SaveNonCreatableWillBeEnabled, RecoveredScripts
 
 	if ToSaveInstance == game then
 		OPTIONS.mode = "full"
@@ -1549,6 +1548,65 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 
 	local function isLuaSourceContainer(instance)
 		return instance:IsA("LuaSourceContainer")
+	end
+
+	local function pre_decompile_all(roots)
+		if OPTIONS.noscripts then return end
+
+		local scripts = {}
+		local function scan(inst)
+			if isLuaSourceContainer(inst) then
+				local isLocalScript = inst:IsA("LocalScript")
+				local isServer = isLocalScript and inst.RunContext == Enum.RunContext.Server
+					or not isLocalScript and inst:IsA("Script") and inst.RunContext ~= Enum.RunContext.Client
+
+				if not isServer then
+					table.insert(scripts, inst)
+				end
+			end
+			for _, child in ipairs(inst:GetChildren()) do
+				scan(child)
+			end
+		end
+
+		for _, root in ipairs(roots) do
+			scan(root)
+		end
+
+		local total = #scripts
+		if total == 0 then return end
+
+		local completed = 0
+		local queue = {unpack(scripts)}
+		local active = 0
+		local max_threads = 8
+
+		local function worker()
+			active += 1
+			while #queue > 0 do
+				local scr = table.remove(queue, 1)
+				if scr then
+					local success, result = pcall(custom_decompiler, scr)
+					local output = success and result or ("-- Failed to decompile: " .. tostring(result))
+					
+					ldeccache[scr] = output
+					completed += 1
+					if StatusText then
+						StatusText.Text = "Pre-decompiling scripts: " .. completed .. "/" .. total
+					end
+				end
+				task.wait(0.05)
+			end
+			active -= 1
+		end
+
+		for i = 1, math.min(max_threads, total) do
+			task.spawn(worker)
+		end
+
+		while active > 0 do
+			task.wait(0.1)
+		end
 	end
 
 	do
@@ -1799,6 +1857,9 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 			local getbytecode = construct_TimeoutHandler(3, getscriptbytecode) -- ? Solara fix
 
 			ldecompile = function(script)
+				if ldeccache[script] then
+					return ldeccache[script]
+				end
 				local s, bytecode = pcall(getscriptbytecode, script)
 				local bytes_str = "N/A"
 				if s and type(bytecode) == "string" and #bytecode > 0 then
@@ -2467,6 +2528,11 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 
 	local function save_game()
 		writefile(placename, "")
+
+		if StatusText then
+			StatusText.Text = "Scanning scripts for decompilation..."
+		end
+		pre_decompile_all(ToSaveInstance and { ToSaveInstance } or ToSaveList)
 
 		if IsModel then
 			savebuffer[savebuffer_size] = '<Meta name="ExplicitAutoJoints">true</Meta>'
