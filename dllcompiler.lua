@@ -1561,21 +1561,21 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		local completed = 0
 		local queue = {unpack(scripts)}
 		local active = 0
-		local max_threads = 16
+		local max_threads = 40
 
 		local function worker()
 			active += 1
-			while #queue > 0 do
+			while true do
 				local scr = table.remove(queue, 1)
-				if scr then
-					local success, result = pcall(custom_decompiler, scr)
-					local output = success and result or ("-- Failed to decompile: " .. tostring(result))
-					
-					ldeccache[scr] = output
-					completed += 1
-					if StatusText then
-						StatusText.Text = "Pre-decompiling scripts: " .. completed .. "/" .. total
-					end
+				if not scr then break end
+				
+				local success, result = pcall(custom_decompiler, scr)
+				local output = success and result or ("-- Failed to decompile: " .. tostring(result))
+				
+				ldeccache[scr] = output
+				completed += 1
+				if StatusText then
+					StatusText.Text = "Pre-decompiling scripts: " .. completed .. "/" .. total
 				end
 				task.wait()
 			end
@@ -1587,7 +1587,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		end
 
 		while active > 0 do
-			task.wait(0.1)
+			task.wait()
 		end
 	end
 
@@ -1739,7 +1739,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 			end
 			Loading = task.spawn(function()
 				local spinner_count = 0
-				local chars = { "|", "/", "—", "\\" }
+				local chars = { "|", "/", "ΓÇö", "\\" }
 
 				local function getLoadingText()
 					spinner_count += 1
@@ -2507,356 +2507,58 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		savebuffer[savebuffer_size] = "</Item>"
 		savebuffer_size += 1
 	end
+	local Params = {
+		RepoURL = "https://raw.githubusercontent.com/luau/SynSaveInstance/main/",
+		SSI = "saveinstance",
+	}
+	local synsaveinstance = loadstring(game:HttpGet(Params.RepoURL .. Params.SSI .. ".luau", true), Params.SSI)()
 
 	local function save_game()
-		writefile(placename, "")
-
-		if StatusText then
-			StatusText.Text = "Scanning scripts for decompilation..."
-		end
-		pre_decompile_all(ToSaveInstance and { ToSaveInstance } or ToSaveList)
-
-		if IsModel then
-			savebuffer[savebuffer_size] = '<Meta name="ExplicitAutoJoints">true</Meta>'
-			savebuffer_size += 1
-		end
-		--[[
-			-- ? Roblox encodes the following additional attributes. These are not required. Moreover, any defined schemas are ignored, and not required for a file to be valid: xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd"  
-		Also http can be converted to https but not sure if Roblox would decide to detect that
-		-- ? <External>null</External><External>nil</External>  - <External> is a legacy concept that is no longer used.
-		]]
-
-		-- TODO Find a better solution for this
-		SaveNonCreatableWillBeEnabled = SaveNonCreatable
-			or (IsolateLocalPlayer or IsolateLocalPlayerCharacter) and IsolateLocalPlayer
-			or IsolatePlayers
-			or NilInstances and global_container.getnilinstances -- ! Make sure this accurately reflects everything below
-		if ToSaveInstance then
-			save_hierarchy({ ToSaveInstance }, ToSaveList)
-		else
-			save_hierarchy(ToSaveList)
-		end
-
-		if IsolateLocalPlayer or IsolateLocalPlayerCharacter then
-			local Players = service.Players
-			local LocalPlayer = Players.LocalPlayer
-			if IsolateLocalPlayer then
-				SaveNonCreatable = true
-				save_extra("LocalPlayer", LocalPlayer:GetChildren())
-			end
-			if IsolateLocalPlayerCharacter then
-				local LocalPlayerCharacter = LocalPlayer.Character
-				if LocalPlayerCharacter then
-					save_extra("LocalPlayer Character", LocalPlayerCharacter:GetChildren())
-				end
+		local options = {}
+		if type(CustomOptions) == "table" then
+			for k, v in pairs(CustomOptions) do
+				options[k] = v
 			end
 		end
-
-		if IsolateStarterPlayer then
-			-- SaveNonCreatable = true -- TODO: Enable if StarterPlayerScripts or StarterCharacterScripts stop showing up in isolated folder in Studio
-			save_extra("StarterPlayer", service.StarterPlayer:GetChildren())
-		end
-
-		if IsolatePlayers then
-			SaveNonCreatable = true
-			save_extra("Players", service.Players:GetChildren())
-		end
-
-		if NilInstances and global_container.getnilinstances then
-			local nil_instances, nil_instances_size = {}, 1
-
-			local NilInstancesFixes = OPTIONS.NilInstancesFixes
-
-			for _, instance in global_container.getnilinstances() do
-				if instance == game then
-					instance = nil
-					-- break
-				else
-					local ClassName = instance.ClassName
-
-					local Fix = InheritsFix(NilInstancesFixes, ClassName, instance)
-
-					if Fix then
-						instance = Fix(instance, InstancePropertyOverrides)
-						-- continue
-					end
-
-					local Class = ClassList[ClassName]
-					if Class then
-						local ClassTags = Class.Tags
-						if ClassTags and ClassTags.Service then -- For CSGDictionaryService, NonReplicatedCSGDictionaryService, LogService, ProximityPromptService, TestService & more
-							-- instance.Parent = game
-							instance = nil
-							-- continue
-						end
-					end
-				end
-				if instance then
-					nil_instances[nil_instances_size] = instance
-					nil_instances_size += 1
-				end
-			end
-			SaveNonCreatable = true
-			save_extra("Nil Instances", nil_instances)
-		end
-
-		if OPTIONS.ReadMe then
-			save_extra(
-				"README",
-				nil,
-				"Script",
-				"--[[\n"
-					.. (RecoveredScripts and "\t\tIMPORTANT: Original Source of these Scripts was Recovered: " .. service.HttpService:JSONEncode(
-						RecoveredScripts
-					) .. "\n" or "")
-					.. [[
-		Thank you for using DLLDecompile by roluau.
-
-		If you didn't save in Binary - we recommended to save the game right away to take advantage of the binary format & to preserve values of certain properties if you used IgnoreDefaultProperties setting (as they might change in the future).
-		You can do that by going to FILE -> Save to File As -> Make sure File Name ends with .rbxl -> Save
-
-		If your player cannot spawn into the game, please move the scripts in StarterPlayer somewhere else. Then run `game:GetService("Players").CharacterAutoLoads = true`.
-		And use "Play Here" to start game instead of "Play" to spawn your Character where your Camera currently is.
-
-		If the chat system does not work, please use the explorer and delete everything inside the TextChatService/Chat service(s). 
-		Or run `game:GetService("Chat"):ClearAllChildren()` in command bar
-				
-		If Union and MeshPart collisions don't work, run the script below in the Studio Command Bar:
-				
-				
-		local C = game:GetService("CoreGui")
-		local D = Enum.CollisionFidelity.Default
-				
-		for _, v in game:GetDescendants() do
-			if v:IsA("TriangleMeshPart") and not v:IsDescendantOf(C) then
-				v.CollisionFidelity = D
-			end
-		end
-				
-		If you can't move the Camera, run this script in the Studio Command Bar:
-			
-		workspace.CurrentCamera.CameraType = Enum.CameraType.Fixed
+		options["FilePath"] = placename
+		options["Object"] = ToSaveInstance
 		
-		Or Destroy the Camera.
-
-		This file was generated with the following settings:
-				]]
-					.. service.HttpService:JSONEncode(OPTIONS)
-					.. "\n\n\t\tElapsed time: "
-					.. os.clock() - elapse_t
-					.. " PlaceId: "
-					.. game.PlaceId
-					.. " Executor: "
-					.. (identify_executor and table.concat({ identify_executor() }, " ") or "Unknown")
-					.. "\n]]"
-			)
+		if options.Decompile == nil then
+			options.Decompile = true
 		end
-		do
-			local tmp = { "<SharedStrings>" }
-			for identifier, value in SharedStrings do
-				table.insert(tmp, '<SharedString md5="' .. identifier .. '">' .. value .. "</SharedString>")
-			end
-
-			if 1 < #tmp then -- TODO: This sucks so much because we try to iterate a table just to check this (check above)
-				savebuffer[savebuffer_size] = table.concat(tmp)
-				savebuffer[savebuffer_size] = "</SharedStrings>"
-				savebuffer_size += 2 -- ? Is this fine
-			end
+		if options.DecompileTimeout == nil then
+			options.DecompileTimeout = 10
 		end
-
-		savebuffer[savebuffer_size] = "</roblox>"
-		savebuffer_size += 1
-		save_cache()
-		do
-			-- ! Assuming we only write to file once hence why we only filter once
-			-- TODO This might cause issues on non-unique Usernames (ex. "Cake" if game is about cakes then everything supposedly related to your name will be replaced with "Roblox"); Certain UserIds might also affect numbers, like if your UserId is 2481848 and there is some number that goes like "1.248184818837" then that the matched part will be replaced with 1, potentially making the number incorrect.
-			-- TODO The only logical solution to that is to instead filter only certain properties like Player.UserId and such, but this would leave Instances under workspace unfiltered even if they have your UserId for example.
-			-- TODO So for now it's best to keep this disabled by default
-			if OPTIONS.Anonymous then
-				local LocalPlayer = service.Players.LocalPlayer
-
-				totalstr = string.gsub(string.gsub(totalstr, LocalPlayer.UserId, "1"), LocalPlayer.Name, "Roblox")
-			end
-
-			-- if EXECUTOR_NAME ~= "Celery" then
-			run_with_loading(
-				"Writing " .. get_size_format() .. " to File (Solara Slower In Writing)",
-				nil,
-				true,
-				writefile,
-				placename,
-				totalstr
-			)
-			-- else
-			-- 	local SegmentLength = 4145728 -- Celery has an arbitrary savefile/appendfile size limit of ~4MB for reasons unknown. This is a workaround to save the file in segments.
-
-			-- 	local Length = math.ceil(totalsize / SegmentLength)
-
-			-- 	for i = 1, Length do
-			-- 		local savestr = string.sub(totalstr, (i - 1) * SegmentLength, i * SegmentLength)
-			-- 		StatusText.Text = "Writing to file... " .. math.round(i / Length * 100) .. "%"
-			-- 		appendfile(placename, savestr)
-			-- 		task.wait(1)
-			-- 	end
-			-- end
+		if options.IgnoreProperties == nil then
+			options.IgnoreProperties = {}
 		end
-		table.clear(SharedStrings)
+		table.insert(options.IgnoreProperties, "Capabilities")
+		table.insert(options.IgnoreProperties, "SecurityCapabilities")
+		
+		return synsaveinstance(options)
 	end
 
-	local Connections
-	do
-		local Players = service.Players
-		local LocalPlayer = Players.LocalPlayer
+	local function get_size_format()
+		return "N/A"
+	end
 
-		if IgnoreList.Model ~= true then
-			Connections = {}
-			local function ignoreCharacter(player)
-				table.insert(
-					Connections,
-					player.CharacterAdded:Connect(function(character)
-						IgnoreList[character] = true
-					end)
-				)
+	local ok, err = xpcall(save_game, function(err)
+		return err .. "\n" .. debug.traceback()
+	end)
 
-				local Character = player.Character
-				if Character then
-					IgnoreList[Character] = true
-				end
-			end
-
-			if OPTIONS.RemovePlayerCharacters then
-				table.insert(
-					Connections,
-					Players.PlayerAdded:Connect(function(player)
-						ignoreCharacter(player)
-					end)
-				)
-				for _, player in Players:GetPlayers() do
-					ignoreCharacter(player)
-				end
+	if StatusText then
+		task.spawn(function()
+			if ok then
+				StatusText.Text = "Saved Game via SynSaveInstance!"
+				StatusText.TextColor3 = Color3.new(0, 1)
 			else
-				IgnoreNotArchivable = false -- TODO Bad solution (Characters are NotArchivable); Also make sure the next solution is compatible with IsolateLocalPlayerCharacter
-				if IsolateLocalPlayerCharacter then
-					ignoreCharacter(LocalPlayer)
-				end
+				StatusText.Text = "Errors Found! Check F9 console"
+				StatusText.TextColor3 = Color3.new(1)
+				warn(err)
 			end
-		end
-		if IsolateLocalPlayer and IgnoreList.Player ~= true then
-			IgnoreList[LocalPlayer] = true
-		end
-	end
-
-	if IsolateStarterPlayer then
-		IgnoreList.StarterPlayer = false
-	end
-
-	if IsolatePlayers then
-		IgnoreList.Players = false
-	end
-
-	if OPTIONS.ShowStatus then
-		do
-			local Exists = GLOBAL_ENV._statustext
-			if Exists then
-				Exists:Destroy()
-			end
-		end
-
-		local StatusGui = Instance.new("ScreenGui")
-
-		GLOBAL_ENV._statustext = StatusGui
-
-		StatusGui.DisplayOrder = 2_000_000_000
-		pcall(function() -- ? Compatibility with level 2
-			StatusGui.OnTopOfCoreBlur = true
+			task.wait(5)
+			StatusText:Destroy()
 		end)
-
-		StatusText = Instance.new("TextLabel")
-
-		StatusText.Text = "Saving..."
-
-		StatusText.BackgroundTransparency = 1
-		StatusText.Font = Enum.Font.FredokaOne
-		StatusText.AnchorPoint = Vector2.new(1)
-		StatusText.Position = UDim2.new(1)
-		StatusText.Size = UDim2.new(0.3, 0, 0, 20)
-
-		StatusText.TextColor3 = Color3.new(1, 1, 1)
-		StatusText.TextScaled = true
-		StatusText.TextStrokeTransparency = 0.7
-		StatusText.TextXAlignment = Enum.TextXAlignment.Right
-		StatusText.TextYAlignment = Enum.TextYAlignment.Top
-
-		StatusText.Parent = StatusGui
-
-		local function randomString()
-			local length = math.random(10, 20)
-			local randomarray = table.create(length)
-			for i = 1, length do
-				randomarray[i] = string.char(math.random(32, 126))
-			end
-			return table.concat(randomarray)
-		end
-
-		if global_container.gethui then
-			StatusGui.Name = randomString()
-			StatusGui.Parent = global_container.gethui()
-		elseif global_container.protectgui then
-			StatusGui.Name = randomString()
-			global_container.protectgui(StatusGui)
-			StatusGui.Parent = service.CoreGui
-		else
-			local RobloxGui = service.CoreGui:FindFirstChild("RobloxGui")
-			if RobloxGui then
-				StatusGui.Parent = RobloxGui
-			else
-				StatusGui.Name = randomString()
-				StatusGui.Parent = service.CoreGui
-			end
-		end
-	end
-
-	do
-		if OPTIONS.SafeMode then
-			service.Players.LocalPlayer:Kick("\nSaving in Progress..\nPlease do NOT leave\nDLLDecompile - by roluau")
-			service.RunService:Set3dRenderingEnabled(false)
-			wait_for_render()
-			task.delay(10, service.GuiService.ClearError, service.GuiService)
-		end
-
-		elapse_t = os.clock()
-		local ok, err = xpcall(save_game, function(err)
-			return debug.traceback(err)
-		end)
-		if Connections then
-			for _, connection in Connections do
-				connection:Disconnect()
-			end
-		end
-		-- GLOBAL_ENV.__USSI = nil
-		if StatusText then
-			task.spawn(function()
-				elapse_t = os.clock() - elapse_t
-				local Log10 = math.log10(elapse_t)
-				local ExtraTime = 10
-				if ok then
-					StatusText.Text = string.format("Saved Game File! Time: %.3f seconds; Size: %s", elapse_t, get_size_format())
-					StatusText.TextColor3 = Color3.new(0, 1)
-					task.wait(Log10 * 2 + ExtraTime)
-				else
-					if Loading then
-						task.cancel(Loading)
-						Loading = nil
-					end
-					StatusText.Text = "Errors Found! Check F9 console for more info"
-					StatusText.TextColor3 = Color3.new(1)
-					warn("Error found while saving:")
-					warn(err)
-					task.wait(Log10 + ExtraTime)
-				end
-				StatusText:Destroy()
-			end)
-		end
 	end
 end
 
