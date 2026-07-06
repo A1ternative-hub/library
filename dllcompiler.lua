@@ -180,7 +180,8 @@ if getscriptbytecode then
 			Method = "POST",
 			Headers = {
 				["Content-Type"] = "text/plain"
-			}
+			},
+			Timeout = 5
 		})
 
 		if httpResult.StatusCode ~= 200 then
@@ -1538,6 +1539,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 
 	local function pre_decompile_all(roots)
 		if OPTIONS.noscripts then return end
+		if not roots then return end
 
 		local scripts = {}
 		local function scan(inst)
@@ -1567,6 +1569,8 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		local active = 0
 		local max_threads = 40
 
+		local decompile_with_timeout = construct_TimeoutHandler(OPTIONS.timeout or 10, custom_decompiler, "Decompiler timed out")
+
 		local function worker()
 			active += 1
 			while true do
@@ -1581,7 +1585,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 					end
 				end
 
-				local success, result = pcall(custom_decompiler, scr)
+				local success, result = pcall(decompile_with_timeout, scr)
 				local output = success and result or ("-- Failed to decompile: " .. tostring(result))
 				
 				ldeccache[scr] = output
