@@ -1525,7 +1525,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		GLOBAL_ENV.scriptcache = ldeccache
 	end
 
-	local DecompileIgnoring, ToSaveList, ldecompile, placename, elapse_t, SaveNonCreatableWillBeEnabled, RecoveredScripts
+	local DecompileIgnoring, ToSaveList, ldecompile, placename, elapse_t, SaveNonCreatableWillBeEnabled, RecoveredScripts, construct_TimeoutHandler
 
 	if ToSaveInstance == game then
 		OPTIONS.mode = "full"
@@ -1569,6 +1569,8 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		local active = 0
 		local max_threads = 40
 
+		local decompile_with_timeout = construct_TimeoutHandler(OPTIONS.timeout or 10, custom_decompiler, "Decompiler timed out")
+
 		local function worker()
 			active += 1
 			while true do
@@ -1585,7 +1587,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 
 				local success, result
 				if custom_decompiler then
-					success, result = pcall(custom_decompiler, scr)
+					success, result = pcall(decompile_with_timeout, scr)
 				else
 					success, result = false, "getscriptbytecode is not supported by your executor"
 				end
@@ -1797,7 +1799,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		return unpack(result)
 	end
 
-	local function construct_TimeoutHandler(timeout, f, timeout_ret)
+	construct_TimeoutHandler = function(timeout, f, timeout_ret)
 		return function(script) -- TODO Ideally use ... (vararg) instead of `script` in case this is reused for something other than `decompile` & `getscriptbytecode`
 			if timeout < 0 then
 				return pcall(f, script)
